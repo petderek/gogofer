@@ -18,7 +18,7 @@ var (
 // ReadmeHandler returns a static readme file for any request. This is meant to serve as an example of a custom handler.
 type ReadmeHandler struct{}
 
-func (handler *ReadmeHandler) Serve(_ gogofer.Request) gogofer.Response {
+func (handler *ReadmeHandler) Serve(_ gogofer.Selector) gogofer.Response {
 	if file == nil {
 		return nil
 	}

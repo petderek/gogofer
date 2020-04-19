@@ -49,7 +49,7 @@ dollar toast.`
 // /ipsum.txt
 type StaticGopherMapHandler struct{}
 
-func (s *StaticGopherMapHandler) Serve(request gogofer.Request) gogofer.Response {
+func (s *StaticGopherMapHandler) Serve(request gogofer.Selector) gogofer.Response {
 	switch request.Path {
 	case "":
 		return gogofer.NewGopherMap(bytes.NewBufferString(gophermap), *host, *port)

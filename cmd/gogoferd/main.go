@@ -18,6 +18,5 @@ var (
 func main() {
 	flag.Parse()
 	log.Println("Starting server")
-
 	log.Fatal("not implemented")
 }

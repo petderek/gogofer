@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	MaxRequestSizeBytes = 255
+	MaxSelectorSizeBytes = 255
 )
 
 const (
@@ -24,7 +24,7 @@ var (
 	notFound            = []byte("Resource Not Found")
 )
 
-type Request struct {
+type Selector struct {
 	Path string
 }
 
@@ -33,14 +33,14 @@ type Response interface {
 }
 
 type Handler interface {
-	Serve(Request) Response
+	Serve(Selector) Response
 }
 
 type StaticTextHandler struct {
 	Message []byte
 }
 
-func (h *StaticTextHandler) Serve(req Request) Response {
+func (h *StaticTextHandler) Serve(req Selector) Response {
 	return &StaticTextResponse{}
 }
 
@@ -48,22 +48,36 @@ type StaticTextResponse struct {
 	Message []byte
 }
 
+func (s *StaticTextResponse) Data() []byte {
+	return s.Message
+}
+
+// do not attach an error message unless you intend for it to be visible to
+// clients
 type errorResponse struct {
-	Path []byte
+	Err error
 }
 
 func (e *errorResponse) Data() []byte {
 	g := &GopherMapEntry{
 		Type:    '3',
 		Display: internalServerError,
-		Path:    e.Path,
 	}
-	return (&GopherMap{Entries: []*GopherMapEntry{g}}).Data()
+	if e.Err != nil {
+		// eerrerror
+		g.Path = []byte(e.Err.Error())
+	}
+
+	entries := make([]*GopherMapEntry, 1, 1)
+	entries[0] = g
+
+	gm := &GopherMap{
+		Entries: entries,
+	}
+
+	return gm.Data()
 }
 
-func (s *StaticTextResponse) Data() []byte {
-	return s.Message
-}
 
 type Server struct {
 	Addr    string
@@ -102,18 +116,19 @@ func (s *Server) ListenAndServe() error {
 func (s *Server) handle(c net.Conn) {
 	defer c.Close()
 
-	r := bufio.NewReader(c)
-	line, _, err := r.ReadLine()
-	if err != nil {
-		log.Println("Unable to read data from connection: ", err)
+	scan := bufio.NewScanner(c)
+	scan.Buffer(nil, MaxSelectorSizeBytes)
+	scan.Scan()
+	if scan.Err() != nil {
+		log.Println("Unable to read data from connection: ", scan.Err())
 	}
-	req := Request{Path: string(line)}
+	req := Selector{Path: scan.Text()}
 	res := s.Handler.Serve(req)
 	if res == nil {
-		log.Println("Error for request: ", string(line))
+		log.Println("Error for selector: ", scan.Text())
 		res = &errorResponse{}
 	}
-	if _, err = c.Write(res.Data()); err != nil {
+	if _, err := c.Write(res.Data()); err != nil {
 		log.Println("Error writing: ", err)
 	}
 }
