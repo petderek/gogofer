@@ -2,7 +2,13 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+
+	"os"
+	"path/filepath"
+
+	"github.com/petderek/gogofer"
 )
 
 const (
@@ -18,5 +24,33 @@ var (
 func main() {
 	flag.Parse()
 	log.Println("Starting server")
-	log.Fatal("not implemented")
+
+	rDir := resolveDirectory(*dir)
+
+	h := &GogoferdHandler{
+		Host:      *host,
+		Port:      *port,
+		Directory: rDir,
+	}
+	server := &gogofer.Server{
+		Addr:    fmt.Sprintf("%s:%d", *host, *port),
+		Handler: h,
+	}
+	log.Fatal(server.ListenAndServe())
+}
+
+func resolveDirectory(dir string) string {
+	if dir == "" {
+		path, err := os.Getwd()
+		if err != nil {
+			log.Fatal("Unable to set working directory: ", err)
+		}
+		return path
+	}
+
+	path, err := filepath.Abs(dir)
+	if err != nil {
+		log.Fatal("Unable to get absolute path: ", err)
+	}
+	return path
 }

@@ -3,25 +3,25 @@ build: bin/gogoferd bin/gophermap-example bin/readme-example
 
 release: fmt test bin/gogoferd
 
-bin/gogoferd: .bin-stamp *.go gogoferd/*.go
-    go build -o bin/gogoferd ./gogoferd
+bin/gogoferd: .bin-stamp *.go
+	go build -o bin/gogoferd ./cmd/gogoferd
 
-bin/gophermap-example: .bin-stamp *.go ./cmd/gophermap-examplee/*.go
-    go build -o bin/readme-example ./cmd/gophermap-example
+bin/gophermap-example: .bin-stamp *.go
+	go build -o bin/gophermap-example ./cmd/gophermap-example
 
-bin/readme-example: .bin-stamp *.go ./cmd/readme-example/*.go
-    go build -o bin/readme-example ./cmd/readme-example
+bin/readme-example: .bin-stamp *.go
+	go build -o bin/readme-example ./cmd/readme-example
 
 .bin-stamp:
-    mkdir bin
-    touch .bin-stamp
+	mkdir bin
+	touch .bin-stamp
 
 fmt:
-    go fmt ./...
+	go fmt ./...
 
 test:
-    go test ./...
+	go test ./...
 
 clean:
-    rm -f .*-stamp
-    rm -rf ./bin
+	rm -f .*-stamp
+	rm -rf ./bin

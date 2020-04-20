@@ -15,13 +15,20 @@ var (
 	file = flag.String("f", "README.md", "the file to serve")
 )
 
-// ReadmeHandler returns a static readme file for any request. This is meant to serve as an example of a custom handler.
+const gmap = "0Readme\tREADME.md\t%s\t%d\r\n"
+
+// ReadmeHandler returns a static readme file for any request. This is meant
+// to serve as an example of a custom handler. A an empty selector returns a
+// very basic gophermap pointing to the readme.
 type ReadmeHandler struct{}
 
-func (handler *ReadmeHandler) Serve(_ gogofer.Selector) gogofer.Response {
-	if file == nil {
-		return nil
+func (handler *ReadmeHandler) Serve(selector gogofer.Selector) gogofer.Response {
+	if selector.Path == "" {
+		return &gogofer.StaticTextResponse{
+			Message: []byte(fmt.Sprintf(gmap, *host, *port)),
+		}
 	}
+
 	f, err := os.Open(*file)
 	if err != nil {
 		log.Println("Error: ", err)

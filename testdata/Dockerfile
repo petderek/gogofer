@@ -2,8 +2,10 @@
 # this program.
 FROM amazonlinux:2
 RUN yum install -y git golang nmap-ncat lynx
-
-WORKDIR /root/go/src/github.com/petderek
+RUN yum install -y make
+WORKDIR /root/go/src/github.com/petderek/gogofer
 
 ADD . .
 
+RUN make
+CMD /root/go/src/github.com/petderek/gogofer/bin/gogoferd
