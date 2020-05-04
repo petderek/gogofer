@@ -21,3 +21,4 @@ Right now it supports text documents and gophermaps.
 neat to have a go gopherhole full of gopher pictures.
 * Compliance with rfc1436. I've tested it with a couple random clients,
 but if it is actually compliant it was an accident.
+* A basic multiplexer, probably similar to ServeMux in net/http.
